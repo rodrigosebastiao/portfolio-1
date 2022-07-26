@@ -1,0 +1,104 @@
+@import '../../../../../styles/Windows/variables';
+
+.window {
+    &__frame {
+        position: relative;
+        background: #fff;
+        header {
+            pointer-events: none;
+            z-index: 10;
+            position: absolute;
+            right: 0;
+            width: auto;
+            height: $header;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            // background: $headerColor;
+            // border: 1px solid #222;
+        }       
+        &.active {
+            display: block;
+        }
+        &.inactive {
+            display: none;
+        }
+    }
+    &__controllers {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        pointer-events: auto;
+    }
+
+    &__icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: calc($header - 5px);
+
+        &:hover {
+            background: $hoverbg;
+        }
+
+        div {
+            position: absolute;
+            background: $iconColor;
+            border-color: $iconColor;
+            width: 10px;
+        }
+
+        &__minimize {
+            div {
+                height: 1px;
+                &:hover {
+                    background: $iconColorHover;
+                }
+            }
+        }
+
+        &__restore {
+            div {
+                background: $headerColor;
+                border: 1px solid  $iconColorHover;
+                width: 8px;
+                height: 8px;
+                &:hover {
+                    border-color: $iconColorHover;
+                }
+                &:nth-child(1){
+                    margin-top: -4px;
+                    margin-left: 4px;
+                }
+            }
+        }
+
+        &__close {
+            &:hover {
+                background: $bgclose;
+            }
+            div {
+                position: absolute;
+                width: 1px;
+                height: 12px;
+                &:hover {
+                    background: $iconColorHover;
+                }
+                &:nth-child(1){
+                    transform: rotate(-45deg);
+                }
+                &:nth-child(2){
+                    transform: rotate(45deg);
+                }
+            }
+        }
+    }
+}
+
+#desktop {
+    &.hidden {
+        display: none;
+    }
+}

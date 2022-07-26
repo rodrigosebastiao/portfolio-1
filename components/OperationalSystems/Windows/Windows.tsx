@@ -1,13 +1,13 @@
-import {useState, useEffect, useLayoutEffect} from "react";
-import Bar from "./Taskbar/Bar";
-import Window from "./Program/Window";
+import {useState, useEffect, useCallback} from "react";
+import Desktop from "./Programs/Desktop/Desktop";
+import Window from "./Programs/Window/Window";
+import Taskbar from "./Taskbar/Taskbar";
 import {systemPrograms}  from "../Windows/controllers/programs";
 import { GraphQLClient, request, gql } from 'graphql-request';
-import Link from "next/link";
 import Modal from 'react-modal';
 
 
-interface BarIconsCollection {
+interface TaskbarIconsCollection {
     barIconsCollection: {
         /* items: Array<{
             image: {
@@ -32,7 +32,7 @@ const accessToken = "9KoJS3scUGP-zbfsWyRlfa9Cdk0_DWDKVzyqjPl-j5g";//Preview
 const endpoint = `https://graphql.contentful.com/content/v1/spaces/${space_id}/environments/${environment_id}?access_token=${accessToken}`;
 
 export default function Windows(){
-    const [APIContent, setAPIContent] = useState<BarIconsCollection>({barIconsCollection: []});
+    const [APIContent, setAPIContent] = useState<TaskbarIconsCollection>({barIconsCollection: []});
 
     useEffect(()=>{
         //   const client = contentful.createClient({
@@ -86,8 +86,28 @@ export default function Windows(){
     }, []);
 
 
-    const newSystemPrograms = systemPrograms.map(item=>({...item, isOpen: false, selected: false, windowContent: null, zIndex: 0}));
+    /*     const componentList = [
+        {name: "desktop", component: Desktop}
+    ] */
+
+    const MAX_Z_INDEX = 5000;
+
+    /* Initial State Management */
+    const newSystemPrograms = systemPrograms.map(item=>({
+        ...item, 
+        open: false, 
+        active: false, 
+        redirectWindow: false,
+        leftMenu: false,
+        ready: false,
+        windowContent: null, 
+        zIndex: 0
+    }));
+    
     const [statePrograms, setStatePrograms] = useState(newSystemPrograms);
+    const [desktopVisible, setDesktopVisible] = useState(true);
+    const [taskbarPosition, setBarPosition, ] = useState({top: false, right: false, left: false, bottom: true});
+  
 
     useEffect(()=>{
         const createProgramContainer = (id) => {
@@ -98,7 +118,7 @@ export default function Windows(){
             root.appendChild(child);
         }
 
-        statePrograms            
+        statePrograms
             .map(program=>{
                 createProgramContainer(program.id);
                 Modal.setAppElement(`#${program.id}`);
@@ -106,17 +126,9 @@ export default function Windows(){
     }, []);
 
 
-    const alternateProgram = (currentState, currentProgram) => {
-        return currentState.map(program=>({
-            ...program,
-            selected: program.id === currentProgram.id
-        }));
-    }
 
-    const MAX_Z_INDEX = 5000;
-
-    const programOverlay = (currentState, currentProgram, zIndex) => {        
-        return currentState.map(program=>{
+    const programOverlay = (currentProgram, zIndex) => {        
+        return statePrograms.map(program=>{
             if(program.id === currentProgram.id){
                 program.zIndex = zIndex;                
             } else {
@@ -127,53 +139,71 @@ export default function Windows(){
         });
     }
 
-    const openProgram = async (currentProgram, query) => {
-
-        statePrograms.map((program)=>({...program, selected: false}));
-
-        const updateStatePrograms = await Promise.all( 
-            statePrograms.map(async (program)=>{
-                if(program.id === currentProgram.id){
-                    program.selected = !program.selected;
-                    if(!currentProgram.isOpen){
-                        const syntheticDelay = Math.random() * (2000 - 500) + 500;
-                        //Loader start
-                        await new Promise((resolve)=>setTimeout(resolve, syntheticDelay));
-                        
-                        program.windowContent = await currentProgram.open();
-                        // program.windowContent = await program.name;
-                        
-                        // const req = await fetch(`/api/scrape?url=https://www.google.com`);
-                        // const res = await req.json();
-                        // const data = await res.data;
-                        // program.windowContent = await data;
-
-                        program.isOpen = true;
-                    }
-                } else {
-                    program.selected = false;
-                }
-                return program;
-            })
-        );
-        
-        programOverlay(statePrograms, currentProgram, MAX_Z_INDEX);
-
-        setStatePrograms([...updateStatePrograms]);
-
-        //Loader stop
+    const progressStart = () => {
+        document.body.classList.add("progress");
     }
+
+    const progressComplete = () => {
+        document.body.classList.remove("progress");
+    }
+
+
+
+    const openProgram = useCallback(async (currentProgram, query) => {
+        if(!currentProgram.open){
+
+            progressStart();
+        }
+
+        const syntheticDelay = Math.random() * 800;
+        await new Promise((resolve)=>setTimeout(resolve, syntheticDelay));
+        
+        statePrograms.map((program)=>({...program, active: false}));
+
+        statePrograms.map((program)=>{
+            if(program.id === currentProgram.id){
+                program.active = !program.active;
+                if(!currentProgram.open){                        
+                    program.open = true;
+                    program.active = true;
+                }
+            } else {
+                program.active = false;
+            }
+            return program;
+        });
+        
+        programOverlay(currentProgram, MAX_Z_INDEX);
+        setStatePrograms([...statePrograms]);
+        setDesktopVisible(false);
+
+        /* setTimeout(()=>{
+            // In case get stuck
+            progressComplete();
+        }, 5000); */
+    }, []);
 
     const closeProgram = (currentProgram) => {
         statePrograms.map((program)=>{
             if(program.id === currentProgram.id){
-                program.selected = false;
-                program.isOpen = false;
-                program.windowContent = null;
+                program.active = false;
+                program.open = false;
             }
             return program;
         });
-        programOverlay(statePrograms, currentProgram, 0);
+        programOverlay(currentProgram, 0);
+
+        setStatePrograms([...statePrograms]);
+        setDesktopVisible(true);
+    }
+
+    const restoreMaximize = (currentProgram) => {
+        statePrograms.map((program)=>{
+            if(program.id === currentProgram.id){
+                /* TODO */
+            }
+            return program;
+        });
 
         setStatePrograms([...statePrograms]);
     }
@@ -185,14 +215,27 @@ export default function Windows(){
             {/* <MouseLoader /> */}
             {/* <WindowWelcomeScreen /> */}
             {/* <h1>Windows 10</h1> */}
+
+            <Desktop
+                desktopVisible={desktopVisible}
+                zIndex={MAX_Z_INDEX}
+            />
+
             <Window
                 statePrograms={statePrograms}
                 setStatePrograms={setStatePrograms}
+                openProgram={openProgram}
                 closeProgram={closeProgram}
+                restoreMaximize={restoreMaximize}
+                taskbarPosition={taskbarPosition}
             />
-            <Bar
+            <Taskbar
                 statePrograms={statePrograms}
                 setStatePrograms={setStatePrograms}
+                desktopVisible={desktopVisible}
+                setBarPosition={setBarPosition}
+                taskbarPosition={taskbarPosition}
+                setDesktopVisible={setDesktopVisible}
                 openProgram={openProgram}
                 backgroundColor="rgba(25, 25, 25, 0.85)"
                 blur={"15px"}

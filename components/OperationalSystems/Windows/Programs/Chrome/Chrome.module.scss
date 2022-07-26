@@ -1,0 +1,271 @@
+@import '../../../../../styles/Windows/variables';
+
+
+$programWindow: #2b373d;
+$programWindow2: #445760;
+$borderColor: #6a7377;
+$inputbg: #38454c;
+
+:export {
+    programWindow: $programWindow;
+}
+
+.chrome {
+    &__search {
+        width: 100%;
+        padding: 0 7px 0 30px;
+        height: 26px;
+        border-radius: 40px;
+        color: $textColor;
+        background: $inputbg;
+        border: none;
+        /*  &:-webkit-autofill:focus,
+        &:-webkit-autofill:hover, 
+        &:-webkit-autofill:active */
+        &:-webkit-autofill {
+            caret-color: $textColor;
+            -webkit-text-fill-color: $textColor !important;
+            -webkit-box-shadow: 0 0 0 30px $inputbg inset !important;
+        }
+
+        &:focus {
+            outline: #8ab4f8;
+            color: $textColor;
+            background: darken($programWindow, 5%) !important;
+            -webkit-box-shadow: 0 0 0 30px darken($programWindow, 5%) inset !important;
+        }
+        &::placeholder {
+            color: $textColor;
+        }
+        &::selection {
+            -webkit-text-fill-color: #333 !important;
+            background: #9cc3f5;
+        }
+        
+
+        &__wrapper {
+            position: relative;
+            background: $programWindow2;
+            padding: 5px 0;
+        }
+        &__form {
+            position: relative;
+            user-select: none;
+            i {
+                position: absolute;
+                left: 7px;
+                top: 50%;
+                transform: translate(0, -50%);
+                margin-top: 1px;
+                width: 15px;
+                height: 15px;
+                line-height: 9.5px;
+                font-size: 8px;
+                text-align: center;
+                color: #9da3a9;
+                background: transparent;
+                border-radius: 100%;
+                border: 2px solid #9da3a9;
+            }
+        }
+    }
+    &__sub_header {
+        position: relative;
+        background: $programWindow;
+        pointer-events: none;
+        > * {
+            pointer-events: auto;
+        }
+    }
+    &__sub_tabs {
+        position: relative;
+        color: $textColor;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        span {
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+        }
+    }
+    &__sub_tab {
+        user-select: none;
+        white-space: nowrap;
+        // overflow: hidden;
+        position: relative;
+        display: flex;
+        align-items: center;    
+        max-width: 188px;
+        height: 100%;
+        padding: 0 12px;
+        background: $programWindow;
+        &__title {
+            position: absolute;
+            right: 3px;
+            overflow: hidden;
+            width: 80%;
+        }
+        &-curve {
+            opacity: 0;
+            overflow: hidden;
+            display: block;
+            position: absolute;
+            bottom: 0;
+            z-index: 2;
+            width: 10px;
+            height: 10px;
+            span {
+                border-radius: 50%;
+                display: block;
+                width: 200%;
+                height: 200%;
+                position: absolute;
+                border-radius: 50%;
+                bottom: 0;
+            }
+            &-left {
+                left: -10px;
+                span {
+                    right: 0;
+                    box-shadow: 10px 10px 0 0 $programWindow2;
+                }
+            }
+            &-right {
+                right: -10px;
+                span {
+                    left: 0;
+                    box-shadow: -10px 10px 0 0 $programWindow2;
+                }
+            }
+        }
+        &:hover {
+            filter: contrast(0.9);
+            &::after,
+            &::before  {
+                content: none;
+            }
+        }
+        &::after,
+        &::before  {
+            content: "";
+            user-select: none;
+            pointer-events: none;
+            position: absolute;
+        }
+        &::after{
+            background: $borderColor;
+            width: 1px;
+            height: 60%;
+            right: 0;
+        }
+        &--active {
+            border-top-right-radius: 10px;
+            border-top-left-radius: 10px;
+            background: $programWindow2;
+            &:hover {
+                filter: none;
+            }
+            &::before,
+            &::after {
+                content: none;
+            }
+            .chrome__sub_tab-curve {
+                opacity: 1;
+            }
+            /* &::before,
+            &::after {
+                bottom: 0;
+                background: $programWindow2;
+                box-shadow: 50px 50px 0 0 #ddd;
+                width: 20px;
+                height: 15px;
+                z-index: 1;
+            }
+            &::before {
+                left: -15px;
+                border-bottom-right-radius: 20px;
+            }
+            &::after {
+                right: -15px;
+                border-bottom-left-radius: 20px;
+            } */
+        }
+    }
+    &__window {
+        display: none;
+        &--active {
+            display: block;
+        }
+    }
+    &__favicon {
+        margin-right: 7%;
+        font-size: 0;
+        
+        img {
+            max-width: 15px;
+            max-height: 100%;
+        }
+    }
+    &__newtab {
+        margin-left: 10px;
+    }
+    &__icon {
+        &__close {
+            border-radius: 100%;
+            position: absolute;
+            right: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            &:hover {
+                background: rgba($iconColor, $alpha: 0.1);
+            }
+            div {
+                position: absolute;
+                width: 2px;
+                height: 12px;
+                background: $iconColor;
+                &:nth-child(1){
+                    transform: rotate(-45deg);
+                }
+                &:nth-child(2){
+                    transform: rotate(45deg);
+                }
+            }
+        }
+        &__newtab {
+            border-radius: 100%;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 27px;
+            height: 27px;
+            background: transparent;
+            &:hover {
+                background: $hoverbg;
+            }
+            div {
+                position: absolute;
+                width: 1.9px;
+                height: 12px;
+                background: $iconColor;
+                &:nth-child(1){
+                    transform: rotate(0deg);
+                }
+                &:nth-child(2){
+                    transform: rotate(90deg);
+                }
+            }
+        }
+    }
+    &__bookmarks {
+        background: $programWindow;
+        
+    }
+}

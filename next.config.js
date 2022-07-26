@@ -7,5 +7,9 @@ module.exports = {
   },
   sassOptions: {
     includePaths: [path.join(__dirname, 'styles')],
+  },
+  styledComponents: true,
+  env: {
+    BASE_URL: process.env.REACT_APP_API_URL,
   }
 }
